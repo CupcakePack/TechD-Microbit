@@ -67,9 +67,11 @@ if choice == 2:  # implementation for two player
             else:
                 display.set_pixel(column, find_height(board, column), 5)
             if button_a.was_pressed():  # change column
+                display.set_pixel(column, find_height(board, column), 0)
                 column += 1
-                if column >= 4:  # cycle back
+                if column >= 5:  # cycle back
                     column = 0
+            display.set_pixel(column, find_height(board, column), 0)
             if button_b.was_pressed():
                 pass
                     
