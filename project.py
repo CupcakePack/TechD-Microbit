@@ -59,13 +59,13 @@ if choice == 2:  # implementation for two player
     while not winner:  # while game is still going on
         display.show(turn)  # show the current turn
         sleep(900)
-        display.show(board)  # show the board state
+        display.show(board_image)  # show the board state
         selected = False  # player has finished selecting a column?
         while not selected:
             if turn == 1:
-                display.set_pixel(column, find_height(col), 9)
+                display.set_pixel(column, find_height(board, column), 9)
             else:
-                display.set_pixel(column, find_height(col), 5)
+                display.set_pixel(column, find_height(board, column), 5)
             if button_a.was_pressed():  # change column
                 column += 1
                 if column >= 4:  # cycle back
