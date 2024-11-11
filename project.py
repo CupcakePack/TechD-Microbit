@@ -62,29 +62,45 @@ if choice == 2:  # implementation for two player
         sleep(900)  # wait
         display.show(board_image)
         selected = False  # player has finished selecting a column?
+
+        # variables to set up chip flashing
+        last_toggle = running_time()  
+        flash_on = True
+        
         while not selected:
             height = find_height(board, column)  # find the topmost empty cell
-            if turn == 1:
-                display.set_pixel(column, height, 9)  # flash animation on
-            else:
-                display.set_pixel(column, height, 5)  # flash animation on
+
+            # flash the currently selected chip
+            if running_time() - last_toggle >= 500:  # interval for flashing
+                flash_on = not flash_on  # toggle flash
+                last_toggle = running_time()  # get running time again
                 
-            if button_a.was_pressed():  # change column
+            if flash_on:
+                if turn == 1:
+                    display.set_pixel(column, height, 9)  # flash on
+                else:
+                    display.set_pixel(column, height, 5)  # flash on
+            else:
+                display.set_pixel(column, height, 0)  # flash off
+
+            # change column
+            if button_a.was_pressed():
                 display.set_pixel(column, height, 0)  # stop flashing current pixel
-                column += 1
-                if column >= 5:  # cycle back
-                    column = 0
+                column = (column + 1) % 5  # add to the column or cycle back
                 height = find_height(board, column)
-                    
-            display.set_pixel(column, height, 0)  # flash animation off
-            
+
+            # confirm choice
             if button_b.was_pressed():
                 if turn == 1:
-                    board[height][column] = "9"
+                    board[height][column] = "9"  # update board
+                    turn = 2  # change turn
                 else:
-                    board[height][column] = "5"
-                turn = 2 if turn == 1 else 1
+                    board[height][column] = "5"  # update board
+                    turn = 1  # change turn
                 selected = True
-                board_image = Image(str(':'.join(''.join(str(cell) for cell in row) for row in board)))
                 # construct the board in an image format
+                board_image = Image(str(':'.join(''.join(
+                    str(cell) for cell in row) for row in board)))
                 display.show(board_image)  # show the board state
+
+                    
