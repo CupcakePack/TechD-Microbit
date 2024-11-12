@@ -15,8 +15,13 @@ from microbit import *
 # The bot's chips are indicated with half brightness (4)
 # Connect 4 to win
 
-# Two player - use A to change the column
-
+# Two player - use A to change the column to drop the chip in
+# The position that the chip will be dropped in is indicated by a flashing light
+# Use B to drop the chip
+# The turn is indicated by a 1 or a 2 after each round
+# Player 1's chips are indicated with maximum brightness (9)
+# Player 2's chips are indicated with half brightness (4)
+# Connect 4 to win
 
 def check_winner():  # function to check winner
     pass
@@ -71,7 +76,7 @@ if choice == 2:  # implementation for two player
             height = find_height(board, column)  # find the topmost empty cell
 
             # flash the currently selected chip
-            if running_time() - last_toggle >= 500:  # interval for flashing
+            if running_time() - last_toggle >= 350:  # interval for flashing
                 flash_on = not flash_on  # toggle flash
                 last_toggle = running_time()  # get running time again
                 
