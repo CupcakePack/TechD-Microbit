@@ -11,7 +11,7 @@ from microbit import *
 # The position that the chip will be dropped in is indicated by a flashing light
 # Use B to drop the chip
 # Wait for the bot to place and then it's your turn again
-# Your chips are indicated with maximum brightness (w9)
+# Your chips are indicated with maximum brightness (9)
 # The bot's chips are indicated with half brightness (4)
 # Connect 4 to win
 
@@ -24,27 +24,27 @@ from microbit import *
 # Connect 4 to win
 
 
-def check_winner(board):
-    # loop over each cell as a potential start point
+def check_winner(board):  # function to find winner and the 4 cells they won in
+    # loop over each cell as a potential start point for a win
     for row in range(5):
         for col in range(5):
             # check left to right
             if col <= 1 and board[row][col] != "0" and board[row][col] == board[row][col+1] == board[row][col+2] == board[row][col+3]:
-                return 1 if int(board[row][col]) == 9 else 2
+                return [1 if int(board[row][col]) == 9 else 2, ((row, col), (row, col+1), (row, col+2), (row, col+3))]
 
             # check top to bottom
             if row <= 1 and board[row][col] != "0" and board[row][col] == board[row+1][col] == board[row+2][col] == board[row+3][col]:
-                return 1 if int(board[row][col]) == 9 else 2
+                return [1 if int(board[row][col]) == 9 else 2, ((row, col), (row+1, col), (row+2, col), (row+3, col))]
 
-            # check bottom left to top right
+            # check diagonal
             if row <= 1 and col <= 1 and board[row][col] != "0" and board[row][col] == board[row+1][col+1] == board[row+2][col+2] == board[row+3][col+3]:
-                return 1 if int(board[row][col]) == 9 else 2
+                return [1 if int(board[row][col]) == 9 else 2, ((row, col), (row+1, col+1), (row+2, col+2), (row+3, col+3))]
 
-            # check diagonal top left to bottom right
+            # check other diagonal
             if row >= 3 and col <= 1 and board[row][col] != "0" and board[row][col] == board[row-1][col+1] == board[row-2][col+2] == board[row-3][col+3]:
-                return 1 if int(board[row][col]) == 9 else 2
+                return [1 if int(board[row][col]) == 9 else 2, ((row, col), (row-1, col+1), (row-2, col+2), (row-3, col+3))]
 
-    return 0  # no winner found
+    return [0, None]  # no winner found
 
 
 def find_height(game, col):  # function to find the lowest empty cell in a column
@@ -128,8 +128,19 @@ if choice == 2:  # implementation for two player
                 board_image = Image(str(':'.join(''.join(
                     str(cell) for cell in row) for row in board)))
                 display.show(board_image)  # show the board state
-        winner = check_winner(board)
-        print(winner)
-        
+        win_info = check_winner(board)  # get the win info
+        winner = win_info[0]  # winner of game
+        win_squares = win_info[1]  # cells in which they won
+    end_time = running_time() + 3250  # flash for 3.25 seconds
+    flash_on = True  # flash toggler
+    while running_time() < end_time:
+        # flash ON or OFF
+        for (r, c) in win_squares:
+            # flash the pixel depending on who won and whether flash is on or off
+            display.set_pixel(c, r, 9 if winner == 1 and flash_on else 5 if winner == 2 and flash_on else 0)
+        flash_on = not flash_on  # toggle
+        sleep(175)  # wait
 
-                    
+    # display the victory message
+    for i in range(3):
+        display.scroll("P%s WINS!" % winner, delay=100)
