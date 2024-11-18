@@ -1,21 +1,18 @@
 from microbit import *
 
-
-# GET 4 IN A ROW TO WIN!
-
-# Instructions
+# INSTRUCTIONS
 # Press any button to start
-
 # The turn is indicated by a 1 or a 2
 # Use A to change the column to drop the chip in
 # The position that the chip will be dropped in is indicated by a flashing light
 # Use B to drop the chip
 # Player 1's chips are indicated with maximum brightness (9)
 # Player 2's chips are indicated with half brightness (4)
-# Connect 4 to win
+# Get 4 in a row to win
 
 
-def check_winner(board):  # function to find winner and the 4 cells they won in
+# function to find winner and the 4 cells they won in
+def check_winner(board):
     # loop over each cell as a potential start point for a win
     for row in range(5):
         for col in range(5):
@@ -46,7 +43,8 @@ def check_winner(board):  # function to find winner and the 4 cells they won in
     return [0, None]  # no winner found
 
 
-def find_height(game, col):  # function to find the lowest empty cell in a column
+# function to find the lowest empty cell in a column
+def find_height(game, col):
     for i in range(4, -1, -1):
         if int(game[i][col]) == 0:
             return i
@@ -117,8 +115,11 @@ while winner == 0:  # while game is still going on
     win_info = check_winner(board)  # get the win info
     winner = win_info[0]  # winner of game
     win_squares = win_info[1]  # cells in which they won
+
+# final steps
 end_time = running_time() + 3250  # flash for 3.25 seconds
 flash_on = True  # flash toggler
+
 while running_time() < end_time:
     # flash ON or OFF
     for (r, c) in win_squares:
@@ -126,6 +127,7 @@ while running_time() < end_time:
         display.set_pixel(c, r, 9 if winner == 1 and flash_on else 4 if winner == 2 and flash_on else 0)
     flash_on = not flash_on  # toggle
     sleep(175)  # wait
+
 # display the victory message
 for i in range(3):
     display.scroll("P%s WINS!" % winner, delay=100)
