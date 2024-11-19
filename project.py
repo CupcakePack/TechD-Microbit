@@ -1,4 +1,5 @@
 from microbit import *
+import music
 
 # INSTRUCTIONS
 # Press any button to start
@@ -56,6 +57,8 @@ display.scroll("PRESS START", delay=85, wait=False, loop=True)  # show the promp
 while not started:  # while the user hasn't started
     if button_a.was_pressed() or button_b.was_pressed():
         started = True
+        sfx = ["C5:1", "G5:2"]  # start sound
+        music.play(sfx, wait=False)  # play the start sound
 
 # GAME START!
 display.scroll("GO!", delay=90)  # 2 player message
@@ -98,6 +101,7 @@ while winner == 0:  # while game is still going on
         if button_a.was_pressed():
             display.set_pixel(column, height, 0)  # stop flashing current pixel
             column = (column + 1) % 5  # add to the column or cycle back
+            music.play("F5:1", wait=False)  # play sound
             height = find_height(board, column)
         # confirm choice
         if button_b.was_pressed():
@@ -107,6 +111,7 @@ while winner == 0:  # while game is still going on
             else:
                 board[height][column] = "4"  # update board
                 turn = 1  # change turn
+            music.play("F#5:3", wait=False)  # play sound
             selected = True
             # construct the board in an image format
             board_image = Image(str(':'.join(''.join(
@@ -125,9 +130,11 @@ while running_time() < end_time:
     for (r, c) in win_squares:
         # flash the pixel depending on who won and whether flash is on or off
         display.set_pixel(c, r, 9 if winner == 1 and flash_on else 4 if winner == 2 and flash_on else 0)
+    music.play("C:1", wait=False)
     flash_on = not flash_on  # toggle
     sleep(175)  # wait
 
 # display the victory message
+music.play(music.BA_DING, wait=False)  # play victory sound
 for i in range(3):
     display.scroll("P%s WINS!" % winner, delay=100)
