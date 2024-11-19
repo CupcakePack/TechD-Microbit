@@ -11,7 +11,7 @@ import music
 # Player 2's chips are indicated with half brightness (4)
 # Get 4 in a row to win
 
-
+ 
 # function to find winner and the 4 cells they won in
 def check_winner(board):
     # loop over each cell as a potential start point for a win
@@ -51,6 +51,14 @@ def find_height(game, col):
             return i
 
 
+# function to check if the board is full
+def check_full(board):
+    for row in board:
+        if "0" in row:
+            return False  # found an empty cell
+    return True  # no empty cells and board is full
+
+
 started = False
 
 display.scroll("PRESS START", delay=85, wait=False, loop=True)  # show the prompt message
@@ -78,14 +86,26 @@ column = 2  # currently selected column, 0 is leftmost, starts in the middle
 while winner == 0:  # while game is still going on
     column = 2
     display.show(turn)  # show the current turn
-    sleep(900)  # wait
+    sleep(900)
+
+    # flush any pending button presses to prevent pressing too early
+    button_a.was_pressed()
+    button_b.was_pressed()
+    
     display.show(board_image)
     selected = False  # player has finished selecting a column?
+    
     # variables to set up chip flashing
     last_toggle = running_time()
     flash_on = True
+    
     while not selected:
         height = find_height(board, column)  # find the topmost empty cell
+        
+        if height is None:  # column is full
+            column = (column + 1) % 5  # move to the next column
+            continue  # skip the rest of this iteration
+            
         # flash the currently selected chip
         if running_time() - last_toggle >= 350:  # interval for flashing
             flash_on = not flash_on  # toggle flash
@@ -97,12 +117,14 @@ while winner == 0:  # while game is still going on
                 display.set_pixel(column, height, 4)  # flash on
         else:
             display.set_pixel(column, height, 0)  # flash off
+            
         # change column
         if button_a.was_pressed():
             display.set_pixel(column, height, 0)  # stop flashing current pixel
             column = (column + 1) % 5  # add to the column or cycle back
             music.play("F5:1", wait=False)  # play sound
             height = find_height(board, column)
+            
         # confirm choice
         if button_b.was_pressed():
             if turn == 1:
@@ -117,24 +139,34 @@ while winner == 0:  # while game is still going on
             board_image = Image(str(':'.join(''.join(
                 str(cell) for cell in row) for row in board)))
             display.show(board_image)  # show the board state
+            
     win_info = check_winner(board)  # get the win info
     winner = win_info[0]  # winner of game
     win_squares = win_info[1]  # cells in which they won
+    
+    # check for tie
+    if winner == 0 and check_full(board):  
+        music.play(music.POWER_DOWN, wait=False)  # play tie sound
+        display.scroll("TIE!", delay=100)  # display tie message
+        break  # exit game loop
 
-# final steps
-end_time = running_time() + 3250  # flash for 3.25 seconds
-flash_on = True  # flash toggler
+# final steps (only if someone wins)
+if winner != 0:
+    end_time = running_time() + 3250  # flash for 3.25 seconds
+    flash_on = True  # flash toggler
 
-while running_time() < end_time:
-    # flash ON or OFF
-    for (r, c) in win_squares:
-        # flash the pixel depending on who won and whether flash is on or off
-        display.set_pixel(c, r, 9 if winner == 1 and flash_on else 4 if winner == 2 and flash_on else 0)
-    music.play("C:1", wait=False)
-    flash_on = not flash_on  # toggle
-    sleep(175)  # wait
+    music.play(music.JUMP_UP, wait=False, loop=True)  # play a celebration tone
+    while running_time() < end_time:
+        # flash ON or OFF
+        for (r, c) in win_squares:
+            # flash the pixel depending on who won and whether flash is on or off
+            display.set_pixel(c, r, 9 if winner == 1 and flash_on else 4 if winner == 2 and flash_on else 0)
+        flash_on = not flash_on  # toggle
+        sleep(175)  # wait
+    music.stop()  # stop the music
 
-# display the victory message
-music.play(music.BA_DING, wait=False)  # play victory sound
-for i in range(3):
-    display.scroll("P%s WINS!" % winner, delay=100)
+    # display the victory message
+    music.play(music.BA_DING, wait=False)  # play victory sound
+    for i in range(3):
+        display.scroll("P%s WINS!" % winner, delay=100)
+        music.play(music.BA_DING, wait=False)
